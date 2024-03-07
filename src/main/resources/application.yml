@@ -1,0 +1,47 @@
+server:
+  port: 8080
+
+spring:
+  profiles:
+    active: dev
+  main:
+    allow-circular-references: true
+  datasource:
+    druid:
+      driver-class-name: ${exam.datasource.driver-class-name}
+      url: jdbc:mysql://${exam.datasource.host}:${exam.datasource.port}/${exam.datasource.database}?serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=utf-8&zeroDateTimeBehavior=convertToNull&useSSL=false&allowPublicKeyRetrieval=true
+      username: ${exam.datasource.username}
+      password: ${exam.datasource.password}
+
+mybatis-plus:
+  configuration:
+    map-underscore-to-camel-case: false
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+  global-config:
+    db-config:
+      logic-delete-field: isDelete # 全局逻辑删除的实体字段名
+      logic-delete-value: 1 # 逻辑已删除值（默认为 1）
+      logic-not-delete-value: 0 # 逻辑未删除值（默认为 0）
+  mapper-locations: classpath:mapper/*.xml
+  type-aliases-package: com.cx.partnerbackend.model.domain
+
+logging:
+  level:
+    com:
+      camellia:
+        exam:
+          mapper: debug
+          service: info
+          controller: info
+
+# jwt 相关
+user:
+  jwt:
+    # 设置jwt签名加密时使用的秘钥
+    admin-secret-key: camellia_secret_key
+    # 设置jwt过期时间
+    admin-ttl: 7200000 # 两小时
+    # 设置前端传递过来的令牌名称
+    admin-token-name: token
+
+
