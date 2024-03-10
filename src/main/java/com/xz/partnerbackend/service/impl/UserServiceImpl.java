@@ -48,6 +48,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         if (userAccount.length() < 4) {
             throw new BusinessException(UserMsgFailedConstant.PARAM_AC_SHORT);
         }
+        // todo: 测试阶段（4位密码，后面更新为8位）
         if (userPassword.length() < 8 || checkPassword.length() < 8) {
             throw new BusinessException(UserMsgFailedConstant.PARAM_PWD_LONG);
         }

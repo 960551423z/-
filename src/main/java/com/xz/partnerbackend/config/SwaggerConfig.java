@@ -29,7 +29,7 @@ import java.net.InetAddress;
 @EnableKnife4j
 @EnableSwagger2WebMvc
 @Slf4j
-public class SwaggerConfig extends WebMvcConfigurationSupport implements CommandLineRunner {
+public class SwaggerConfig implements WebMvcConfigurer , CommandLineRunner {
 
     @Value("${server.port}")
     private Integer port;
