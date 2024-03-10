@@ -16,7 +16,8 @@ create table user
     createTime   datetime default CURRENT_TIMESTAMP null comment '创建时间',
     updateTime   datetime default CURRENT_TIMESTAMP null on update CURRENT_TIMESTAMP,
     isDelete     tinyint  default 0                 not null comment '是否删除',
-    userRose     tinyint  default 0                 not null comment '用户角色 0-普通用户  1-管理员'
+    userRose     tinyint  default 0                 not null comment '用户角色 0-普通用户  1-管理员',
+    tags         varchar(512)                       comment '用户标签'
 )
 comment '用户';
 

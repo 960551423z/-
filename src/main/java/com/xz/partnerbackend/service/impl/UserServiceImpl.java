@@ -1,33 +1,38 @@
 package com.xz.partnerbackend.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.xz.partnerbackend.common.ErrorCode;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.xz.partnerbackend.constant.PwdSalt;
 import com.xz.partnerbackend.constant.UserMsgFailedConstant;
 import com.xz.partnerbackend.exception.BusinessException;
+import com.xz.partnerbackend.mapper.UserMapper;
 import com.xz.partnerbackend.model.domain.User;
 import com.xz.partnerbackend.model.vo.UserLoginVO;
 import com.xz.partnerbackend.service.UserService;
-import com.xz.partnerbackend.mapper.UserMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.DigestUtils;
 
 import javax.annotation.Resource;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
-* @author 96055
-* @description 针对表【user(用户)】的数据库操作Service实现
-* @createDate 2024-03-07 16:32:32
-*/
+ * @author 96055
+ * @description 针对表【user(用户)】的数据库操作Service实现
+ * @createDate 2024-03-07 16:32:32
+ */
 @Service
 @Slf4j
 public class UserServiceImpl extends ServiceImpl<UserMapper, User>
-    implements UserService{
+        implements UserService {
 
     @Resource
     private UserMapper userMapper;
@@ -41,7 +46,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
             throw new BusinessException(UserMsgFailedConstant.PARAM_EMPTY);
         }
         if (userAccount.length() < 4) {
-            throw new BusinessException(UserMsgFailedConstant.PARAM_AC_SHORT );
+            throw new BusinessException(UserMsgFailedConstant.PARAM_AC_SHORT);
         }
         if (userPassword.length() < 8 || checkPassword.length() < 8) {
             throw new BusinessException(UserMsgFailedConstant.PARAM_PWD_LONG);
@@ -108,6 +113,65 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         }
 
         return user;
+    }
+
+
+    /**
+     * 根据标签搜索用户 （内存过滤）
+     *
+     * @param tageNameList
+     * @return
+     */
+    @Override
+    public List<UserLoginVO> searchUserByTags(List<String> tageNameList) {
+        if (CollectionUtils.isEmpty(tageNameList)) {
+            throw new BusinessException(UserMsgFailedConstant.PARAM_EMPTY);
+        }
+
+        // 方法二： 先查，再进行判断
+        LambdaQueryWrapper<User> queryWrapper = new LambdaQueryWrapper<>();
+        List<User> userList = userMapper.selectList(queryWrapper);
+        Gson gson = new Gson();
+        List<UserLoginVO> newList = new ArrayList<>();
+        UserLoginVO userLoginVO = UserLoginVO.builder().build();
+        // 在内存中判断是否包含要求标签
+        for (User user : userList) {
+            String tags = user.getTags();
+            Set<String> tempSet = gson.fromJson(tags, new TypeToken<Set<String>>() {
+            }.getType());
+            tempSet = Optional.ofNullable(tempSet).orElse(new HashSet<>());
+            for (String tagName : tageNameList) {
+                if (tempSet.contains(tagName)) {
+                    BeanUtils.copyProperties(user, userLoginVO);
+                    newList.add(userLoginVO);
+                }
+            }
+        }
+        return newList;
+    }
+
+    /**
+     * 根据标签搜索用户 （SQL 版本）
+     * @param tageNameList
+     * @return
+     */
+    @Override
+    @Deprecated
+    public List<UserLoginVO> searchUserByTagsBySQL(List<String> tageNameList) {
+        // 方法一： 拼接
+        LambdaQueryWrapper<User> queryWrapper = new LambdaQueryWrapper<>();
+        // 拼接 and 查询
+        for (String tagName : tageNameList) {
+            queryWrapper = queryWrapper.like(User::getTags, tagName);
+        }
+        List<User> userList = userMapper.selectList(queryWrapper);
+        UserLoginVO userLoginVO = UserLoginVO.builder().build();
+        List<UserLoginVO> newList = new ArrayList<>();
+        for (User user : userList) {
+            BeanUtils.copyProperties(user, userLoginVO);
+            newList.add(userLoginVO);
+        }
+        return newList;
     }
 }
 
