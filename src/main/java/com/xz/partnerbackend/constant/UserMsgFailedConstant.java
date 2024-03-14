@@ -19,5 +19,6 @@ public class UserMsgFailedConstant {
     public static final String AC_EXIST = "账户存在";
 
     public static final String SAVE_FAILED = "账户注册失败";
+    public static final String NO_LOGIN = "账户未登录";
 
 }

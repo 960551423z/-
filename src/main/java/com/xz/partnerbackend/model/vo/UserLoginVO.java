@@ -64,6 +64,7 @@ public class UserLoginVO {
 
     /**
      * token
+     * todo: 后期可以删掉
      */
     private String token;
 

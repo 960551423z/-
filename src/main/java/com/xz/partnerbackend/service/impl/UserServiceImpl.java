@@ -9,6 +9,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.xz.partnerbackend.constant.PwdSalt;
+import com.xz.partnerbackend.constant.SessionConstant;
 import com.xz.partnerbackend.constant.UserMsgFailedConstant;
 import com.xz.partnerbackend.exception.BusinessException;
 import com.xz.partnerbackend.mapper.UserMapper;
@@ -23,6 +24,7 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.DigestUtils;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -86,7 +88,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
     }
 
     @Override
-    public User userLogin(String userAccount, String userPassword) {
+    public UserLoginVO userLogin(String userAccount, String userPassword,  HttpServletRequest request) {
         // 1. 校验
         if (StringUtils.isAnyBlank(userAccount, userPassword)) {
             return null;
@@ -116,7 +118,13 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
             return null;
         }
 
-        return user;
+        // 脱敏
+        UserLoginVO userLoginVO = UserLoginVO.builder().build();
+        BeanUtils.copyProperties(user, userLoginVO);
+
+        // 存储Session
+        request.getSession().setAttribute(SessionConstant.USER_LOGIN_STATE,userLoginVO);
+        return userLoginVO;
     }
 
 
@@ -180,6 +188,12 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
             newList.add(userLoginVO);
         }
         return newList;
+    }
+
+    @Override
+    public int userLogout(HttpServletRequest request) {
+        request.getSession().removeAttribute(SessionConstant.USER_LOGIN_STATE);
+        return 1;
     }
 }
 

@@ -5,6 +5,7 @@ import com.xz.partnerbackend.model.domain.User;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.xz.partnerbackend.model.vo.UserLoginVO;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 /**
@@ -16,7 +17,7 @@ public interface UserService extends IService<User> {
 
     void userRegister(String userAccount, String userPassword, String checkPassword);
 
-    User userLogin(String userAccount, String userPassword);
+    UserLoginVO userLogin(String userAccount, String userPassword, HttpServletRequest request);
 
     /**
      * 根据标签搜索用户
@@ -26,4 +27,6 @@ public interface UserService extends IService<User> {
     List<UserLoginVO> searchUserByTags(List<String> tageNameList) throws JsonProcessingException;
 
     List<UserLoginVO> searchUserByTagsBySQL(List<String> tageNameList);
+
+    int userLogout(HttpServletRequest request);
 }
