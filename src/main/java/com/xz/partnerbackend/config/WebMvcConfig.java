@@ -11,9 +11,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupp
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
-
 @Slf4j
-@Profile({"dev", "test"})
 public class WebMvcConfig implements WebMvcConfigurer {
 
 
@@ -27,8 +25,8 @@ public class WebMvcConfig implements WebMvcConfigurer {
      */
     public void addInterceptors(InterceptorRegistry registry) {
         log.info("开始注册自定义拦截器...");
-        registry.addInterceptor(jwtTokenInterceptor)
-                .addPathPatterns("/user/**")
-                .excludePathPatterns("/user/login");
+//        registry.addInterceptor(jwtTokenInterceptor)
+//                .addPathPatterns("/user/**")
+//                .excludePathPatterns("/user/login");
     }
 }

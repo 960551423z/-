@@ -1,8 +1,13 @@
 package com.xz.partnerbackend;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * @Author: 阿庆
@@ -13,18 +18,10 @@ import java.util.Arrays;
 public class TestAbc {
 
     @Test
-    void test1() {
-        int[] a = {10, 6, 4, 2, 9, 6, 4, 8, 2, 3};
-        for (int i = 0; i < a.length - 1; i++) {
-            for (int j = 0; j < a.length -1 - i; j++) {
-                if (a[j] > a[j + 1]) {
-                    int t = a[j];
-                    a[j] = a[j + 1];
-                    a[j + 1] = t;
-                }
-            }
-        }
-
-        System.out.println(Arrays.toString(a));
+    void test1() throws JsonProcessingException {
+        String a = "[\"男\",\"java\"]\n";
+        ObjectMapper mapper = new ObjectMapper();
+        List<String> list = mapper.readValue(a, new TypeReference<List<String>>(){});
+        System.out.println(list);
     }
 }

@@ -1,5 +1,8 @@
 package com.xz.partnerbackend.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.xz.partnerbackend.common.Result;
 import com.xz.partnerbackend.constant.JwtClaimsConstant;
 import com.xz.partnerbackend.constant.UserMsgFailedConstant;
@@ -15,13 +18,12 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.util.CollectionUtils;
+import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -31,6 +33,7 @@ import java.util.Map;
  */
 @RestController
 @RequestMapping("/user")
+@CrossOrigin(origins = {"http://localhost:5173"}) // 后端解决跨域问题
 public class UserController {
 
     @Resource
@@ -39,8 +42,6 @@ public class UserController {
 
     @Resource
     private JwtProperties jwtProperties;
-
-
 
 
     /**
@@ -92,11 +93,22 @@ public class UserController {
                 jwtProperties.getAdminTtl(),
                 claims);
         UserLoginVO userLoginVO = UserLoginVO.builder().build();
-        BeanUtils.copyProperties(user,userLoginVO);
+        BeanUtils.copyProperties(user, userLoginVO);
         userLoginVO.setToken(token);
 
         return Result.success(userLoginVO);
     }
 
+
+    @GetMapping("/search/tags")
+    public Result<List<UserLoginVO>> searchUser(@RequestParam(required = false) List<String> tagNameList) throws JsonProcessingException {
+        if (CollectionUtils.isEmpty(tagNameList)) {
+            throw new BusinessException(UserMsgFailedConstant.PARAM_ERR);
+        }
+
+        List<UserLoginVO> userLoginVOS = userService.searchUserByTags(tagNameList);
+
+        return Result.success(userLoginVOS);
+    }
 
 }

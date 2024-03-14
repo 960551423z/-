@@ -63,6 +63,12 @@ public class User implements Serializable {
 
 
     /**
+     * 简介
+     */
+    private String profile;
+
+
+    /**
      * 状态 0-正常
      */
     private Integer userStatus;

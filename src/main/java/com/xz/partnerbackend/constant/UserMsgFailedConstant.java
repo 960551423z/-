@@ -9,6 +9,7 @@ package com.xz.partnerbackend.constant;
 public class UserMsgFailedConstant {
 
     public static final String PARAM_EMPTY = "参数为空";
+    public static final String PARAM_ERR = "参数错误";
     public static final String PARAM_AC_SHORT = "用户账号过短";
     public static final String PARAM_PWD_LONG = "用户密码过短";
 

@@ -3,6 +3,9 @@ package com.xz.partnerbackend.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.xz.partnerbackend.constant.PwdSalt;
@@ -124,7 +127,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
      * @return
      */
     @Override
-    public List<UserLoginVO> searchUserByTags(List<String> tageNameList) {
+    public List<UserLoginVO> searchUserByTags(List<String> tageNameList) throws JsonProcessingException {
         if (CollectionUtils.isEmpty(tageNameList)) {
             throw new BusinessException(UserMsgFailedConstant.PARAM_EMPTY);
         }
@@ -134,7 +137,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         List<User> userList = userMapper.selectList(queryWrapper);
         Gson gson = new Gson();
         List<UserLoginVO> newList = new ArrayList<>();
-        UserLoginVO userLoginVO = UserLoginVO.builder().build();
+        UserLoginVO userLoginVO;
         // 在内存中判断是否包含要求标签
         for (User user : userList) {
             String tags = user.getTags();
@@ -143,7 +146,11 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
             tempSet = Optional.ofNullable(tempSet).orElse(new HashSet<>());
             for (String tagName : tageNameList) {
                 if (tempSet.contains(tagName)) {
+                    userLoginVO = UserLoginVO.builder().build();
                     BeanUtils.copyProperties(user, userLoginVO);
+                    ObjectMapper mapper = new ObjectMapper();
+                    List<String> list = mapper.readValue(tags, new TypeReference<List<String>>(){});
+                    userLoginVO.setTags(list);
                     newList.add(userLoginVO);
                 }
             }

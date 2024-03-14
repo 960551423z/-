@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupport;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
@@ -29,6 +30,7 @@ import java.net.InetAddress;
 @EnableKnife4j
 @EnableSwagger2WebMvc
 @Slf4j
+@Profile({"dev", "test"})
 public class SwaggerConfig implements WebMvcConfigurer , CommandLineRunner {
 
     @Value("${server.port}")
@@ -48,7 +50,6 @@ public class SwaggerConfig implements WebMvcConfigurer , CommandLineRunner {
     private ApiInfo ApiInfo() {
         return new ApiInfoBuilder()
                 .title("API 接口文档")
-//                .contact(new Contact("zhangsan", "https://blog.csdn.net/baihaibo1024", ""))
                 .version("1.0")
                 .build();
     }

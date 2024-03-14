@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 
 import java.util.Date;
+import java.util.List;
 
 /**
  * @Author: 阿庆
@@ -65,4 +66,16 @@ public class UserLoginVO {
      * token
      */
     private String token;
+
+
+    /**
+     * tags
+     */
+    private List<String> tags;
+
+    /**
+     * 简介
+     */
+    private String profile;
+
 }

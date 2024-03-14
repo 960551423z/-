@@ -1,5 +1,6 @@
 package com.xz.partnerbackend.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.xz.partnerbackend.model.domain.User;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.xz.partnerbackend.model.vo.UserLoginVO;
@@ -22,7 +23,7 @@ public interface UserService extends IService<User> {
      * @param tageNameList
      * @return
      */
-    List<UserLoginVO> searchUserByTags(List<String> tageNameList);
+    List<UserLoginVO> searchUserByTags(List<String> tageNameList) throws JsonProcessingException;
 
     List<UserLoginVO> searchUserByTagsBySQL(List<String> tageNameList);
 }
