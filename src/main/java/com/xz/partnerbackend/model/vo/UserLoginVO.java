@@ -4,7 +4,7 @@ package com.xz.partnerbackend.model.vo;
 import lombok.Builder;
 import lombok.Data;
 
-import java.util.Date;
+import java.io.Serializable;
 import java.util.List;
 
 /**
@@ -14,7 +14,7 @@ import java.util.List;
  */
 @Data
 @Builder
-public class UserLoginVO {
+public class UserLoginVO implements Serializable {
     /**
      * id
      */

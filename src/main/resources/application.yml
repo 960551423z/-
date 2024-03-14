@@ -12,6 +12,16 @@ spring:
       url: jdbc:mysql://${exam.datasource.host}:${exam.datasource.port}/${exam.datasource.database}?serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=utf-8&zeroDateTimeBehavior=convertToNull&useSSL=false&allowPublicKeyRetrieval=true
       username: ${exam.datasource.username}
       password: ${exam.datasource.password}
+  redis:
+    host: ${session.redis.host}
+    port: ${session.redis.port}
+    database: ${session.redis.database}
+    password: ${session.redis.password}
+
+  # 失效时间（分钟）
+  session:
+    timeout: 120
+    store-type: redis
 
 
 knife4j:
