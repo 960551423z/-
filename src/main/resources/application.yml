@@ -18,10 +18,11 @@ spring:
     database: ${session.redis.database}
     password: ${session.redis.password}
 
-  # 失效时间（分钟）
-  session:
-    timeout: 120
-    store-type: redis
+#  # 失效时间（分钟）
+#  session:
+#    timeout: 120
+#    store-type: redis
+
 
 
 knife4j:

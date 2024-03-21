@@ -20,5 +20,8 @@ public class UserMsgFailedConstant {
 
     public static final String SAVE_FAILED = "账户注册失败";
     public static final String NO_LOGIN = "账户未登录";
+    public static final String NO_AUTH = "账户无权限";
+
+    public static final String NULL_ERR = "请求数据为空";
 
 }

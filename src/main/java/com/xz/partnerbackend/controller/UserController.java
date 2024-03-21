@@ -1,6 +1,8 @@
 package com.xz.partnerbackend.controller;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.xz.partnerbackend.common.Result;
 import com.xz.partnerbackend.constant.SessionConstant;
 import com.xz.partnerbackend.constant.UserMsgFailedConstant;
@@ -11,13 +13,17 @@ import com.xz.partnerbackend.model.dto.UserRegisterRequest;
 import com.xz.partnerbackend.model.vo.UserLoginVO;
 import com.xz.partnerbackend.properties.JwtProperties;
 import com.xz.partnerbackend.service.UserService;
+import com.xz.partnerbackend.utils.SessionUtils;
+import com.xz.partnerbackend.utils.UserThread;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -27,15 +33,12 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/user")
-@CrossOrigin(origins = {"http://localhost:5173"}) // 后端解决跨域问题
+//@CrossOrigin(origins = "*") // 后端解决跨域问题
 public class UserController {
 
     @Resource
     private UserService userService;
 
-
-    @Resource
-    private JwtProperties jwtProperties;
 
 
     /**
@@ -78,9 +81,9 @@ public class UserController {
             return Result.error(UserMsgFailedConstant.PARAM_EMPTY);
         }
 
-        UserLoginVO userLoginVO = userService.userLogin(userAccount, userPassword, request);
+        String token = userService.userLogin(userAccount, userPassword, request);
 
-        return Result.success(userLoginVO);
+        return Result.success(token);
     }
 
 
@@ -93,16 +96,8 @@ public class UserController {
      */
     @GetMapping("/current")
     public Result<UserLoginVO> getCurrentUser(HttpServletRequest request) {
-        Object userObj = request.getSession().getAttribute(SessionConstant.USER_LOGIN_STATE);
-        UserLoginVO currentUser = (UserLoginVO) userObj;
-        if (currentUser == null) {
-            throw new BusinessException(UserMsgFailedConstant.NO_LOGIN);
-        }
-        long userId = currentUser.getId();
-        // 获取当前用户
-        User user = userService.getById(userId);
-        UserLoginVO userLoginVO = UserLoginVO.builder().build();
-        BeanUtils.copyProperties(user,userLoginVO);
+
+        UserLoginVO userLoginVO = UserThread.getUser();
         return Result.success(userLoginVO);
     }
 
@@ -122,8 +117,30 @@ public class UserController {
     }
 
 
+    @PostMapping("/update")
+    public Result updateUser(@RequestBody User user, HttpServletRequest request) {
+        // 1. 判断参数
+        if (user == null) {
+            throw new BusinessException(UserMsgFailedConstant.PARAM_EMPTY);
+        }
+
+        // 2. 判断是不是管理员 或者 没登录
+        if (!SessionUtils.isAdmin(request) || SessionUtils.getLogin(request) == null) {
+            throw new BusinessException(UserMsgFailedConstant.NO_LOGIN);
+        }
+
+        // 3. 更新
+        Integer result = userService.updateUser(user, request);
+         return Result.success(result);
+    }
 
 
+    /**
+     * 搜索标签
+     * @param tagNameList
+     * @return
+     * @throws JsonProcessingException
+     */
     @GetMapping("/search/tags")
     public Result<List<UserLoginVO>> searchUser(@RequestParam(required = false) List<String> tagNameList) throws JsonProcessingException {
         if (CollectionUtils.isEmpty(tagNameList)) {
@@ -133,6 +150,25 @@ public class UserController {
         List<UserLoginVO> userLoginVOS = userService.searchUserByTags(tagNameList);
 
         return Result.success(userLoginVOS);
+    }
+
+
+    @GetMapping("/recommend")
+    public Result<List<UserLoginVO>> recommendUser(HttpServletRequest request) {
+
+        QueryWrapper<User> wrapper = new QueryWrapper<>();
+        List<User> list = userService.list(wrapper);
+        UserLoginVO userLoginVO;
+        List<UserLoginVO> newList = new ArrayList<>();
+        for (User user : list) {
+
+            userLoginVO = UserLoginVO.builder().build();
+            BeanUtils.copyProperties(user,userLoginVO);
+//            ObjectMapper mapper = new ObjectMapper();
+            newList.add(userLoginVO);
+        }
+
+        return Result.success(newList);
     }
 
 }

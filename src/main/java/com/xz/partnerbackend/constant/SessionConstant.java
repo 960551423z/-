@@ -13,4 +13,9 @@ public class SessionConstant {
      */
     public static final String  USER_LOGIN_STATE = "userLoginState";
 
+
+    /**
+     * 管理员 - 1
+     */
+    public static final Integer ADMIN = 1;
 }

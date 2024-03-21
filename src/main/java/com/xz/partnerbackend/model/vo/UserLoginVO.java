@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -18,7 +19,7 @@ public class UserLoginVO implements Serializable {
     /**
      * id
      */
-    private Long id;
+    private long id;
 
     /**
      * 用户昵称
@@ -62,11 +63,6 @@ public class UserLoginVO implements Serializable {
      */
     private Integer userRose;
 
-    /**
-     * token
-     * todo: 后期可以删掉
-     */
-    private String token;
 
 
     /**
@@ -78,5 +74,10 @@ public class UserLoginVO implements Serializable {
      * 简介
      */
     private String profile;
+
+    /**
+     * 创建时间
+     */
+    private Date createTime;
 
 }

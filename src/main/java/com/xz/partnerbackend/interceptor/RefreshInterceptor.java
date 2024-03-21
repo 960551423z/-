@@ -2,7 +2,6 @@ package com.xz.partnerbackend.interceptor;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.StrUtil;
-import com.xz.partnerbackend.constant.SessionConstant;
 import com.xz.partnerbackend.model.vo.UserLoginVO;
 import com.xz.partnerbackend.utils.UserThread;
 import lombok.extern.slf4j.Slf4j;
@@ -14,7 +13,6 @@ import org.springframework.web.servlet.HandlerInterceptor;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
@@ -24,14 +22,16 @@ import static com.xz.partnerbackend.constant.RedisConstant.LOGIN_EXPIRE;
 /**
  * @Author: 阿庆
  * @Date: 2024/3/14 10:54
- * Session 拦截器
+ * 刷新 token 的拦截请求
  */
 
 @Component
 @Slf4j
-public class SessionInterceptor implements HandlerInterceptor {
+public class RefreshInterceptor implements HandlerInterceptor {
 
 
+    @Resource
+    private RedisTemplate<String,Object> redisTemplate;
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
@@ -41,16 +41,37 @@ public class SessionInterceptor implements HandlerInterceptor {
             return true;
         }
 
-        // 1. 判断是否需要拦截
-        if(UserThread.getUser() == null) {
-            response.setStatus(401);
-            // 拦截
-            return false;
+
+        // 1.从请求头中获取token
+        String token = request.getHeader("authorization");
+        if (StrUtil.isBlank(token)) {
+            return true;
+        }
+        // 2. 基于 token 从 redis 中获取用户
+        Map<Object, Object> map = redisTemplate.opsForHash().entries(LOGIN + token);
+
+        // 2.1 进行判读，有可能这个登录信息过期了，所以查询出来的map为空
+        if (map.isEmpty()) {
+            return true;
         }
 
-        // 2. 有用户放行
+        // 3. 查询到的 用户时 hash 对象，转成 UserLoginVO 对象
+        UserLoginVO userLoginVO = BeanUtil.fillBeanWithMap(map, UserLoginVO.builder().build(), false);
+
+        // 4. 存储到 ThreadLocal 中
+        UserThread.saveUser(userLoginVO);
+
+        // 5. 刷新 token 有效期
+        redisTemplate.expire(LOGIN + token,LOGIN_EXPIRE, TimeUnit.MINUTES);
+
+        // 6. 放行
         return true;
     }
 
 
+    @Override
+    public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
+        // 避免资源泄露
+        UserThread.removeUser();
+    }
 }

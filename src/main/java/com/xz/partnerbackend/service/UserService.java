@@ -17,7 +17,7 @@ public interface UserService extends IService<User> {
 
     void userRegister(String userAccount, String userPassword, String checkPassword);
 
-    UserLoginVO userLogin(String userAccount, String userPassword, HttpServletRequest request);
+    String userLogin(String userAccount, String userPassword, HttpServletRequest request);
 
     /**
      * 根据标签搜索用户
@@ -29,4 +29,6 @@ public interface UserService extends IService<User> {
     List<UserLoginVO> searchUserByTagsBySQL(List<String> tageNameList);
 
     int userLogout(HttpServletRequest request);
+
+    Integer updateUser(User user,HttpServletRequest request);
 }
